@@ -77,7 +77,7 @@ int main()
 
 	while (1) // draw and display forever
 	{
-		FntPrint("             AYYYY LMAO\n\n\n          KILOHANA!");
+		FntPrint("             Hello world!\n\n             -JOSH MILLER");
 		display();
 	}
 
@@ -111,6 +111,6 @@ void display()
 	DrawSync(0); // wait for all drawing to finish
 	VSync(0); // wait for v_blank interrupt
 	GsSwapDispBuff(); // flip the double buffers
-	GsSortClear(50,50,50,&myOT[CurrentBuffer]); // clear the ordering table with a background color. RGB value 50,50,50 which is a grey background (0,0,0 would be black for example)
+	GsSortClear(0,255,0,&myOT[CurrentBuffer]); // clear the ordering table with a background color. RGB value 50,50,50 which is a grey background (0,0,0 would be black for example)
 	GsDrawOt(&myOT[CurrentBuffer]); // Draw the ordering table for the CurrentBuffer
 }
