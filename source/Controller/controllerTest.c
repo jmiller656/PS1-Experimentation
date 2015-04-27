@@ -2,36 +2,12 @@
 ===========================================================
                 Sony PlayStation 1 Source Code
 ===========================================================
-                         FONT EXAMPLE
-Displays text on the screen using the built in GPU routines
+                         GAMEPAD EXAMPLE
+              Displays on screen input from gamepad
 -----------------------------------------------------------
-
-    Developer / Programmer..............: SCEI & PSXDEV.net
+    Developer / Programmer..............: Josh Miller
     Software Ddevelopment Kit...........: PSY-Q
     Last Release........................: 30/APRIL/2014
-
-    Original code by SCEI | Edited by PSXDEV.net
-
-	NOTE: This example uses double buffering! I may go
-	ahead and remove the double buffering to make the code
-	much more simplistic in the future.
-
-    All PlayStation 1 games are written in C. If you
-	don't know how to program in C, you should follow a
-	book or online tutorial and then take a look at the
-	PSX C code. Above all, the PSX is an excellent system
-	to program on and work with and will not dissapoint you.
-
-    If you need help, read LIBOVR46.PDF in PSYQ/DOCS
-    also join our IRC channel on EFNET #psxdev
-
-  Copyright (C) 1994,1995 by Sony Computer Entertainment Inc.
-                     All Rights Reserved.
-
-   Sony Computer Entertainment Inc. Development Department
-
-                    http://psxdev.net/
-
 -----------------------------------------------------------*/
 
 #include <stdlib.h>
@@ -57,8 +33,13 @@ u_long __stacksize = 0x00004000; // force 16 kilobytes of stack
 // INTEGERS
 // --------
 short CurrentBuffer = 0;
-char *in = "No Input"; //Default Input
 int status; //Used to store current pad status
+
+// -------
+// STRINGS
+// -------
+char *in = "No Input"; //Default Input
+
 // ----------
 // PROTOTYPES
 // ----------
