@@ -1,3 +1,3 @@
-cd C:\Users\Josh\Downloads\hiworld\source\Main
+cd C:\Users\Josh\Downloads\Projects\source\Main
 psymake
 pause

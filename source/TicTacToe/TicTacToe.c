@@ -34,18 +34,25 @@ u_long __stacksize = 0x00004000; // force 16 kilobytes of stack
 // --------
 short CurrentBuffer = 0;
 int status; //Used to store current pad status
-
+int i;
+int j;
+int index;
+int pos[2];
+int blinker;
 // -------
 // STRINGS
 // -------
 char *in = "No Input"; //Default Input
-
+char board[3][3];
+char b_string[35];
 // ----------
 // PROTOTYPES
 // ----------
 void graphics();
 void display();
-void draw(char in[]);
+void setBoard();
+void controllerListener(int status);
+void draw();
 const DEBUG = 1; // debugging
 
 
@@ -55,64 +62,145 @@ int main()
 	FntLoad(960, 256); // load the font from the BIOS into VRAM/SGRAM
 	SetDumpFnt(FntOpen(5, 20, 320, 240, 0, 512)); // screen X,Y | max text length X,Y | autmatic background clear 0,1 | max characters
     PadInit(1); //Initialize controller
-	// should debug = 1 (as seen above), print to the debug window (should you be using one)
-    if (DEBUG) printf("\n\nHello World\n");
-	if (DEBUG) printf("\nhttp://psxdev.net/");
-
-	//char in[10] = "NULL"; //make string for input
-
-
-	while (1) // draw and display forever
+	setBoard();
+    pos[0]=0;
+    pos[1]=0;
+    blinker = 0;
+	while (1) // Game Loop
 	{
-	    draw(in);
-        status = PadRead(0);//Read 32 bit info from pad(s)
-        if(status & PADLup){
-            in = "Up";
-            draw(in);
-            }
-        else if(status & PADLdown){
-            in = "Down";
-            draw(in);
-            }
-        else if(status & PADLleft){
-            in = "Left";
-            draw(in);
-            }
-        else if(status & PADLright){
-            in = "Right";
-            draw(in);
-            }
-        else if(status & PADRup){
-            in = "Triangle";
-            draw(in);
-            }
-        else if(status & PADRdown){
-            in = "X";
-            draw(in);
-            }
-        else if(status & PADRleft){
-            in = "Square";
-            draw(in);
-            }
-        else if(status & PADRright){
-            in = "Circle";
-            draw(in);
-            }
-        else{
-            in = "No Input";
-            draw(in);
-            }
+	    draw();//Draws Board
+       //Read 32 bit info from pad(s) and process input
+        if(blinker%4==0)
+                board[pos[0]][pos[1]]='#';
+        else
+                board[pos[0]][pos[1]]=' ';
+        blinker = blinker++%33;
+        if(blinker%8==0)
+             controllerListener(PadRead(0));
 
 	}
 
 	return 0;
 }
 
-void draw(char in[]){
-    FntPrint("Current controller input:\n\n %s",in);
-		display();//Display fntrprint changes
+/*
+* Make new Blank Board
+*/
+void setBoard(){
+    for(i = 0; i<3;i++){
+        for(j =0; j<3;j++){
+            board[i][j]=' ';
+        }
+    }
 }
+/*
+* Process input from controller
+*/
+void controllerListener(int status){
+    if(status & PADLup){
+            if(pos[0]>0)
+                pos[0]--;
+            }
+        else if(status & PADLdown){
+                if(pos[0]<2)
+                    pos[0]++;
+            }
+        else if(status & PADLleft){
+                if(pos[1]>0)
+                    pos[1]--;
+            }
+        else if(status & PADLright){
+                if(pos[1]<2)
+                    pos[1]++;
+            }
 
+}
+/*
+* Draw contents of board to screen
+*/
+void draw(){
+
+    index = 0;
+    b_string[index]='\t';
+    index++;
+    b_string[index]='\t';
+    index++;
+    i = 0;
+    for(j = 0; j<3;j++){
+        b_string[index]=board[i][j];
+        index++;
+        if(j<2){
+        b_string[index]='!';
+        index++;}
+    }
+
+    i++;
+    b_string[index]='\n';
+    index++;
+    b_string[index]='\t';
+    index++;
+    b_string[index]='\t';
+    index++;
+    b_string[index]='-';
+    index++;
+    b_string[index]='+';
+    index++;
+    b_string[index]='-';
+    index++;
+    b_string[index]='+';
+    index++;
+    b_string[index]='-';
+    index++;
+    b_string[index]='\n';
+    index++;
+    b_string[index]='\t';
+    index++;
+    b_string[index]='\t';
+    index++;
+
+    for(j = 0; j<3;j++){
+        b_string[index]=board[i][j];
+        index++;
+        if(j<2){
+        b_string[index]='!';
+        index++;}
+    }
+
+    i++;
+    b_string[index]='\n';
+    index++;
+    b_string[index]='\t';
+    index++;
+    b_string[index]='\t';
+    index++;
+    b_string[index]='-';
+    index++;
+    b_string[index]='+';
+    index++;
+    b_string[index]='-';
+    index++;
+    b_string[index]='+';
+    index++;
+    b_string[index]='-';
+    index++;
+    b_string[index]='\n';
+    index++;
+    b_string[index]='\t';
+    index++;
+    b_string[index]='\t';
+    index++;
+
+    for(j = 0; j<3;j++){
+        b_string[index]=board[i][j];
+        index++;
+        if(j<2){
+        b_string[index]='!';
+        index++;}
+    }
+    b_string[index]='\0';
+    FntPrint(b_string);
+    display();
+}
 void graphics()
 {
 	if (*(char *)0xbfc7ff52=='E') SetVideoMode(1); else SetVideoMode(0); // within the BIOS, if the address 0xBFC7FF52 equals 'E', set it as PAL (1). Otherwise, set it as NTSC (0)
@@ -129,8 +217,6 @@ void graphics()
 	GsClearOt(0,0,&myOT[0]);
 	GsClearOt(0,0,&myOT[1]);
 }
-
-
 void display()
 {
 	FntFlush(-1); // refresh the font
