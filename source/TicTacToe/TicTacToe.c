@@ -36,15 +36,21 @@ short CurrentBuffer = 0;
 int status; //Used to store current pad status
 int i;
 int j;
+int k;
 int index;
 int pos[2];
 int blinker;
+int win = 0;
+int trn =0;
+int made = 0;
+int pl = 0;
 // -------
 // STRINGS
 // -------
 char *in = "No Input"; //Default Input
 char board[3][3];
 char b_string[35];
+char prevchar;
 // ----------
 // PROTOTYPES
 // ----------
@@ -53,6 +59,8 @@ void display();
 void setBoard();
 void controllerListener(int status);
 void draw();
+void make_Move();
+int checkWin();
 const DEBUG = 1; // debugging
 
 
@@ -66,20 +74,36 @@ int main()
     pos[0]=0;
     pos[1]=0;
     blinker = 0;
-	while (1) // Game Loop
-	{
-	    draw();//Draws Board
-       //Read 32 bit info from pad(s) and process input
-        if(blinker%4==0)
-                board[pos[0]][pos[1]]='#';
-        else
-                board[pos[0]][pos[1]]=' ';
-        blinker = blinker++%33;
-        if(blinker%8==0)
+    draw();
+	while (1){
+	    if(board[pos[0]][pos[1]]!='#'){
+        prevchar = board[pos[0]][pos[1]];
+        board[pos[0]][pos[1]]='#';
+        draw();}
+        blinker = blinker++%9;
+        if(blinker%8==0 && trn==0)
              controllerListener(PadRead(0));
-
+        else if(trn ==1){
+             made = 0;
+            while(made != 1){
+                i = rand()%3;
+                j = rand()%3;
+                if(board[i][j]==' '){
+                    board[i][j]= 'O';
+                    made=1;
+                }
+            }
+            trn = (trn+1)%2;
+        }
+        win = checkWin();
+        if(win==1){
+            if(pl==0)
+                FntPrint("YOU'RE WINNER!");
+            else
+                FntPrint("YOU'RE NOT WINNER!");
+            display();
+            break;}
 	}
-
 	return 0;
 }
 
@@ -97,6 +121,7 @@ void setBoard(){
 * Process input from controller
 */
 void controllerListener(int status){
+    board[pos[0]][pos[1]]=prevchar;
     if(status & PADLup){
             if(pos[0]>0)
                 pos[0]--;
@@ -113,13 +138,18 @@ void controllerListener(int status){
                 if(pos[1]<2)
                     pos[1]++;
             }
+        else if((status & PADRup)||(status & PADRdown)||(status & PADRleft)||(status & PADRright)){
+            if(prevchar==' '){
+                board[pos[0]][pos[1]] = 'X';
+                prevchar='X';
+                trn =(trn+ 1)%2;}
+        }
 
 }
 /*
 * Draw contents of board to screen
 */
 void draw(){
-
     index = 0;
     b_string[index]='\t';
     index++;
@@ -201,8 +231,7 @@ void draw(){
     FntPrint(b_string);
     display();
 }
-void graphics()
-{
+void graphics(){
 	if (*(char *)0xbfc7ff52=='E') SetVideoMode(1); else SetVideoMode(0); // within the BIOS, if the address 0xBFC7FF52 equals 'E', set it as PAL (1). Otherwise, set it as NTSC (0)
 
 	GsInitGraph(SCREEN_WIDTH, SCREEN_HEIGHT, GsINTER|GsOFSGPU, 1, 0); // set the graphics mode resolutions. You may also try using 'GsNONINTER' (read LIBOVR46.PDF in PSYQ/DOCS for detailed information)
@@ -217,8 +246,7 @@ void graphics()
 	GsClearOt(0,0,&myOT[0]);
 	GsClearOt(0,0,&myOT[1]);
 }
-void display()
-{
+void display(){
 	FntFlush(-1); // refresh the font
 	CurrentBuffer=GsGetActiveBuff(); // get the current buffer
 	GsSetWorkBase((PACKET*)GPUPacketArea[CurrentBuffer]); // setup the packet workbase
@@ -228,4 +256,55 @@ void display()
 	GsSwapDispBuff(); // flip the double buffers
 	GsSortClear(50,50,50,&myOT[CurrentBuffer]); // clear the ordering table with a background color. RGB value 50,50,50 which is a grey background (0,0,0 would be black for example)
 	GsDrawOt(&myOT[CurrentBuffer]); // Draw the ordering table for the CurrentBuffer
+}
+int checkWin(){
+void make_Move(){
+
+}
+    char players[2];
+    players[0]='X';
+    players[1]='O';
+    for(i = 0; i<2;i++){
+        pl = i;
+        for(j = 0;j<3;j++){
+            for(k=0;k<3;k++){
+                if(board[j][k]!=players[i])
+                    break;
+                else if(k==2){
+                    return 1;
+                }
+            }
+        }
+
+        for(j = 0; j<3;j++){
+            if(board[j][j]!=players[i]){
+                break;
+            }
+            else if(j ==2){
+                return 1;
+            }
+        }
+
+        for(j = 0; j<3;j++){
+            if(board[j][2-j]!=players[i]){
+                break;
+            }
+            else if(j ==2){
+                return 1;
+            }
+        }
+
+        for(j = 0;j<3;j++){
+            for(k=0;k<3;k++){
+                if(board[k][j]!=players[i])
+                    break;
+                else if(k==2){
+                    return 1;
+                }
+            }
+        }
+        return 0;
+    }
+
+    return 0;
 }
