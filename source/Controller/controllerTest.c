@@ -82,6 +82,15 @@ int main()
             in = "Right";
             draw(in);
             }
+            in = "Triangle";
+            draw(in);
+            }
+            draw(in);
+            }
+            draw(in);
+            }
+            draw(in);
+            }
         else{
             in = "No Input";
             draw(in);
