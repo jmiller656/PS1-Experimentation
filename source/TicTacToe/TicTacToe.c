@@ -44,6 +44,8 @@ int win = 0;
 int trn =0;
 int made = 0;
 int pl = 0;
+int prev =0;
+int curr = 0;
 // -------
 // STRINGS
 // -------
@@ -51,6 +53,7 @@ char *in = "No Input"; //Default Input
 char board[3][3];
 char b_string[35];
 char prevchar;
+char players[2];
 // ----------
 // PROTOTYPES
 // ----------
@@ -60,7 +63,8 @@ void setBoard();
 void controllerListener(int status);
 void draw();
 void make_Move();
-int checkWin();
+int checkWin(char c);
+void checkSpace();
 const DEBUG = 1; // debugging
 
 
@@ -80,29 +84,40 @@ int main()
         prevchar = board[pos[0]][pos[1]];
         board[pos[0]][pos[1]]='#';
         draw();}
-        blinker = blinker++%9;
-        if(blinker%8==0 && trn==0)
-             controllerListener(PadRead(0));
-        else if(trn ==1){
-             made = 0;
-            while(made != 1){
-                i = rand()%3;
-                j = rand()%3;
-                if(board[i][j]==' '){
-                    board[i][j]= 'O';
-                    made=1;
-                }
-            }
-            trn = (trn+1)%2;
+        if(trn==0){
+            controllerListener(PadRead(0));
         }
-        win = checkWin();
-        if(win==1){
-            if(pl==0)
-                FntPrint("YOU'RE WINNER!");
-            else
-                FntPrint("YOU'RE NOT WINNER!");
+        else if(trn ==1){
+            make_Move();
+        }
+        if(checkWin('X')==1){
+            while(1){
+            FntPrint("YOU WIN!\n\nPress Start to play again");
             display();
-            break;}
+            if(PadRead(0)==PADstart){
+                setBoard();
+                break;}
+            }
+            }
+        else if(checkWin('O')==1){
+            while(1){
+                FntPrint("YOU LOSE!\n\nPress Start to play again");
+                display();
+            if(PadRead(0)==PADstart){
+                setBoard();
+                break;}
+            }
+            }
+        else if(checkWin('X')==-1){
+            while(1){
+            FntPrint("Draw!");
+            display();
+            if(PadRead(0)==PADstart){
+                setBoard();
+                break;}
+            }
+
+        }
 	}
 	return 0;
 }
@@ -121,28 +136,35 @@ void setBoard(){
 * Process input from controller
 */
 void controllerListener(int status){
+    prev = curr;
+    curr = PadRead(1);
     board[pos[0]][pos[1]]=prevchar;
-    if(status & PADLup){
+    if((status & PADLup) &&(prev!=curr)){
             if(pos[0]>0)
                 pos[0]--;
+                prev=curr;
             }
-        else if(status & PADLdown){
+        else if((status & PADLdown)&&(prev!=curr)){
                 if(pos[0]<2)
                     pos[0]++;
+                    prev = curr;
             }
-        else if(status & PADLleft){
+        else if((status & PADLleft)&&(prev!=curr)){
                 if(pos[1]>0)
                     pos[1]--;
+                    prev = curr;
             }
-        else if(status & PADLright){
+        else if((status & PADLright)&& (prev!=curr)){
                 if(pos[1]<2)
                     pos[1]++;
+                    prev = curr;
             }
-        else if((status & PADRup)||(status & PADRdown)||(status & PADRleft)||(status & PADRright)){
+        else if(((status & PADRup)||(status & PADRdown)||(status & PADRleft)||(status & PADRright))&&(prev != curr)){
             if(prevchar==' '){
                 board[pos[0]][pos[1]] = 'X';
                 prevchar='X';
                 trn =(trn+ 1)%2;}
+                prev = curr;
         }
 
 }
@@ -257,18 +279,33 @@ void display(){
 	GsSortClear(50,50,50,&myOT[CurrentBuffer]); // clear the ordering table with a background color. RGB value 50,50,50 which is a grey background (0,0,0 would be black for example)
 	GsDrawOt(&myOT[CurrentBuffer]); // Draw the ordering table for the CurrentBuffer
 }
-int checkWin(){
 void make_Move(){
-
-}
-    char players[2];
-    players[0]='X';
-    players[1]='O';
-    for(i = 0; i<2;i++){
-        pl = i;
+        int i = 0;
         for(j = 0;j<3;j++){
             for(k=0;k<3;k++){
-                if(board[j][k]!=players[i])
+                if(board[j][k]==' ' || prevchar==' '){
+                    i+=1;
+                    break;}
+            }}
+            if(i<1){
+                return;
+            }
+            made = 0;
+            while(made != 1){
+                i = rand()%3;
+                j = rand()%3;
+                if(board[i][j]==' '){
+                    board[i][j]= 'O';
+                    made=1;
+                }
+            }
+            trn = (trn+1)%2;
+}
+
+int checkWin(char c){
+        for(j = 0;j<3;j++){
+            for(k=0;k<3;k++){
+                if((board[j][k]!=c))
                     break;
                 else if(k==2){
                     return 1;
@@ -277,7 +314,7 @@ void make_Move(){
         }
 
         for(j = 0; j<3;j++){
-            if(board[j][j]!=players[i]){
+            if((board[j][j]!=c)){
                 break;
             }
             else if(j ==2){
@@ -286,7 +323,7 @@ void make_Move(){
         }
 
         for(j = 0; j<3;j++){
-            if(board[j][2-j]!=players[i]){
+            if((board[j][2-j]!=c)){
                 break;
             }
             else if(j ==2){
@@ -296,15 +333,22 @@ void make_Move(){
 
         for(j = 0;j<3;j++){
             for(k=0;k<3;k++){
-                if(board[k][j]!=players[i])
+                if((board[k][j]!=c))
                     break;
                 else if(k==2){
                     return 1;
                 }
             }
         }
-        return 0;
-    }
 
-    return 0;
+        for(j = 0;j<4;j++){
+            for(k=0;k<4;k++){
+                if(board[j][k]==' ' || prevchar==' '){
+                    return 0;
+                    }
+            }
+
+    return -1;
 }
+}
+
